@@ -10,15 +10,30 @@ class Location extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'city_name',
+        'state_province',
+        'country',
+        'country_code',
         'latitude',
         'longitude',
+        'timezone',
+        'is_active',
     ];
 
     protected $casts = [
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
+        'is_active' => 'boolean',
     ];
+
+    // Get full location name
+    public function getFullNameAttribute()
+    {
+        return $this->state_province
+            ? "{$this->city_name}, {$this->state_province}, {$this->country}"
+            : "{$this->city_name}, {$this->country}";
+    }
+
 
     public function users()
     {
