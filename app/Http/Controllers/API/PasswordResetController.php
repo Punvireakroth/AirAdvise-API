@@ -11,10 +11,33 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
 use App\Models\User;
 
+/**
+ * @group Password Reset
+ *
+ * APIs for password reset functionality
+ */
 class PasswordResetController extends Controller
 {
     use ApiResponses;
 
+    /**
+     * Send password reset link
+     * 
+     * @authenticated
+     * 
+     * @bodyParam email string required The email address. Example: john@example.com
+     * 
+     * @response {
+     *  "data": null,
+     *  "message": "Password reset link sent to your email",
+     *  "status": 200
+     * }
+     * 
+     * @response 400 {
+     *  "message": "Unable to send reset link",
+     *  "status": 400
+     * }
+     */
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => 'required|email']);
@@ -28,6 +51,27 @@ class PasswordResetController extends Controller
         }
     }
 
+    /**
+     * Reset password
+     * 
+     * @authenticated
+     * 
+     * @bodyParam token string required The password reset token. Example: abcdef123456
+     * @bodyParam email string required The user's email. Example: john@example.com
+     * @bodyParam password string required The new password. Example: newpassword123
+     * @bodyParam password_confirmation string required Password confirmation. Example: newpassword123
+     * 
+     * @response {
+     *  "data": null,
+     *  "message": "Password reset successfully",
+     *  "status": 200
+     * }
+     * 
+     * @response 400 {
+     *  "message": "Unable to reset password",
+     *  "status": 400
+     * }
+     */
     public function reset(Request $request)
     {
         $request->validate([
