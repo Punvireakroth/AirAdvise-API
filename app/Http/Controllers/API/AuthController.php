@@ -55,12 +55,26 @@ class AuthController extends Controller
         ]);
     }
 
+    // Log the user out 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        try {
+            $request->user()->currentAccessToken()->delete();
+            return $this->success('Logged out successfully');
+        } catch (\Exception $e) {
+            return $this->error('Failed to logout', 500);
+        }
+    }
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
+    // Return authenticated user profile
+    public function profile(Request $request)
+    {
+        // Current authenticated user
+        try {
+            $authUser = $request->user();
+            return new UserResource($authUser);
+        } catch (\Exception $e) {
+            return $this->error('Failed to fetch user profile', 500);
+        }
     }
 }
