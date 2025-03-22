@@ -45,6 +45,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'profile']);
     Route::put('/user', [AuthController::class, 'update']);
 
+    // Profile management
+
+
     // User preferences
     Route::get('/user/preferences', [UserPreferenceController::class, 'show']);
     Route::put('/user/preferences', [UserPreferenceController::class, 'update']);
