@@ -15,6 +15,9 @@ use App\Http\Controllers\API\FeedbackController;
 use App\Http\Controllers\API\Admin\HealthTipController as AdminHealthTipController;
 use App\Http\Controllers\API\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\API\VerificationController;
+use App\Http\Controllers\API\PasswordResetController;
+
+
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -43,10 +46,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // User profile
     Route::get('/user', [AuthController::class, 'profile']);
-    Route::put('/user', [AuthController::class, 'update']);
 
     // Profile management
+    Route::get('/profile', [UserController::class, 'show']);
+    Route::put('/profile', [UserController::class, 'update']);
 
+    // Password reset
+    Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
+    Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 
     // User preferences
     Route::get('/user/preferences', [UserPreferenceController::class, 'show']);
@@ -71,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin routes
     Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/users', [UserController::class, 'index']); // Admin: List all users
         Route::apiResource('health-tips', AdminHealthTipController::class);
         Route::apiResource('feedback', AdminFeedbackController::class);
         Route::post('/feedback/{feedback}/respond', [AdminFeedbackController::class, 'respond']);

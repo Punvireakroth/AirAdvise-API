@@ -77,17 +77,4 @@ class AuthController extends Controller
             return $this->error('Failed to fetch user profile', 500);
         }
     }
-
-    // Update authenticated user profile
-    public function update(Request $request)
-    {
-        // Current authenticated user
-        try {
-            $authUser = $request->user();
-            $authUser->update($request->all());
-            return new UserResource($authUser);
-        } catch (\Exception $e) {
-            return $this->error('Failed to update user profile', 500);
-        }
-    }
 }
