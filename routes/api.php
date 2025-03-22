@@ -14,6 +14,7 @@ use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\FeedbackController;
 use App\Http\Controllers\API\Admin\HealthTipController as AdminHealthTipController;
 use App\Http\Controllers\API\Admin\FeedbackController as AdminFeedbackController;
+use App\Http\Controllers\API\VerificationController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -60,4 +61,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('feedback', AdminFeedbackController::class);
         Route::post('/feedback/{feedback}/respond', [AdminFeedbackController::class, 'respond']);
     });
+
+    // Email verification
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
+        ->middleware(['signed'])
+        ->name('verification.verify');
+
+    Route::post('/email/resend', [VerificationController::class, 'resend'])
+        ->middleware(['auth:sanctum', 'throttle:6,1']);
 });
