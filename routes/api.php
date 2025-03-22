@@ -20,6 +20,13 @@ use App\Http\Controllers\API\VerificationController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Email verification
+Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
+    ->middleware(['signed'])
+    ->name('verification.verify');
+
+
+
 // Air quality data - some endpoints public
 Route::get('/air-quality', [AirQualityController::class, 'getCurrentByCoordinates']);
 Route::get('/activities', [ActivityController::class, 'index']);
@@ -30,9 +37,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Send email verification
+    Route::post('/email/verification-notification', [VerificationController::class, 'resend'])
+        ->name('verification.send');
+
     // User profile
-    Route::get('/user', [UserController::class, 'show']);
-    Route::put('/user', [UserController::class, 'update']);
+    Route::get('/user', [AuthController::class, 'profile']);
+    Route::put('/user', [AuthController::class, 'update']);
 
     // User preferences
     Route::get('/user/preferences', [UserPreferenceController::class, 'show']);
@@ -61,12 +72,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('feedback', AdminFeedbackController::class);
         Route::post('/feedback/{feedback}/respond', [AdminFeedbackController::class, 'respond']);
     });
-
-    // Email verification
-    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
-        ->middleware(['signed'])
-        ->name('verification.verify');
-
-    Route::post('/email/resend', [VerificationController::class, 'resend'])
-        ->middleware(['auth:sanctum', 'throttle:6,1']);
 });
