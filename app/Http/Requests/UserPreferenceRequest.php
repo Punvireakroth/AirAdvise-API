@@ -11,7 +11,7 @@ class UserPreferenceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class UserPreferenceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'notification_enabled' => 'sometimes|boolean',
+            'aqi_threshold' => 'sometimes|integer|min:0|max:500',
+            'preferred_language' => 'sometimes|string|max:10',
+            'temperature_unit' => 'sometimes|in:celsius,fahrenheit',
         ];
     }
 }

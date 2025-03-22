@@ -14,6 +14,15 @@ class UserPreferenceResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'user_id' => $this->user_id,
+            'notification_enabled' => $this->notification_enabled,
+            'aqi_threshold' => $this->aqi_threshold,
+            'preferred_language' => $this->preferred_language,
+            'temperature_unit' => $this->temperature_unit,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 }

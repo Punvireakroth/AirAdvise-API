@@ -56,8 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 
     // User preferences
-    Route::get('/user/preferences', [UserPreferenceController::class, 'show']);
-    Route::put('/user/preferences', [UserPreferenceController::class, 'update']);
+    Route::get('/preferences', [UserPreferenceController::class, 'show']);
+    Route::put('/preferences', [UserPreferenceController::class, 'update']);
 
     // Locations
     Route::apiResource('locations', LocationController::class);
