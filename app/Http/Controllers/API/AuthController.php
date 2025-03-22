@@ -12,10 +12,45 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\LoginRequest;
 
+/**
+ * @group Authentication
+ *
+ * APIs for user authentication
+ */
 class AuthController extends Controller
 {
     use ApiResponses;
 
+    /**
+     * Register a new user
+     * 
+     * @authenticated
+     * 
+     * @bodyParam name string required The name of the user. Example: John Doe
+     * @bodyParam email string required The email of the user. Example: john@example.com
+     * @bodyParam password string required The password of the user. Example: password123
+     * @bodyParam password_confirmation string required Password confirmation. Example: password123
+     * 
+     * @response 201 {
+     *  "user": {
+     *    "id": 1,
+     *    "name": "John Doe",
+     *    "email": "john@example.com",
+     *    "role": "user",
+     *    "email_verified_at": null,
+     *    "created_at": "2023-01-01T00:00:00.000000Z",
+     *    "updated_at": "2023-01-01T00:00:00.000000Z"
+     *  },
+     *  "token": "1|abcdefghijklmnopqrstuvwxyz"
+     * }
+     * 
+     * @response 422 {
+     *  "message": "The email has already been taken.",
+     *  "errors": {
+     *    "email": ["The email has already been taken."]
+     *  }
+     * }
+     */
     public function register(RegisterRequest $request)
     {
         $user = User::create([
@@ -37,6 +72,31 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * Login user
+     * 
+     * @authenticated
+     * 
+     * @bodyParam email string required The email of the user. Example: john@example.com
+     * @bodyParam password string required The password of the user. Example: password123
+     * 
+     * @response {
+     *  "user": {
+     *    "id": 1,
+     *    "name": "John Doe",
+     *    "email": "john@example.com",
+     *    "role": "user",
+     *    "email_verified_at": "2023-01-01T00:00:00.000000Z",
+     *    "created_at": "2023-01-01T00:00:00.000000Z",
+     *    "updated_at": "2023-01-01T00:00:00.000000Z"
+     *  },
+     *  "token": "1|abcdefghijklmnopqrstuvwxyz"
+     * }
+     * 
+     * @response 401 {
+     *  "message": "Invalid credentials"
+     * }
+     */
     public function login(LoginRequest $request)
     {
         $user = User::where('email', $request->email)->first();
@@ -55,7 +115,17 @@ class AuthController extends Controller
         ]);
     }
 
-    // Log the user out 
+    /**
+     * Logout the authenticated user
+     * 
+     * @authenticated
+     * 
+     * @response {
+     *  "data": null,
+     *  "message": "Logged out successfully",
+     *  "status": 200
+     * }
+     */
     public function logout(Request $request)
     {
         try {
@@ -66,7 +136,21 @@ class AuthController extends Controller
         }
     }
 
-    // Return authenticated user profile
+    /**
+     * Get authenticated user profile
+     * 
+     * @authenticated
+     * 
+     * @response {
+     *  "id": 1,
+     *  "name": "John Doe",
+     *  "email": "john@example.com",
+     *  "role": "user",
+     *  "email_verified_at": "2023-01-01T00:00:00.000000Z",
+     *  "created_at": "2023-01-01T00:00:00.000000Z",
+     *  "updated_at": "2023-01-01T00:00:00.000000Z"
+     * }
+     */
     public function profile(Request $request)
     {
         // Current authenticated user
