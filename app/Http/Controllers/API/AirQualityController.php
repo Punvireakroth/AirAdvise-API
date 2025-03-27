@@ -83,7 +83,7 @@ class AirQualityController extends Controller
         $safeActivities = Activity::where('max_safe_aqi', '>=', $recentData->aqi)->get();
         $unsafeActivities = Activity::where('max_safe_aqi', '<', $recentData->aqi)->get();
 
-        // Get health tips
+        // Get health tips based on the last 1 hour air quality data
         $healthTips = HealthTip::where('min_aqi', '<=', $recentData->aqi)
             ->where('max_aqi', '>=', $recentData->aqi)
             ->get();
@@ -156,5 +156,58 @@ class AirQualityController extends Controller
             'unsafe_activities' => $unsafeActivities,
             'health_tips' => $healthTips,
         ]);
+    }
+
+    // Get historical air quality data for a location
+    public function getHistorical(Request $request, Location $location)
+    {
+        $request->validate([
+            'days' => 'required|integer|min:1|max:30',
+        ]);
+
+        // Check if user has access to that location
+        if (!$request->user()->locations()->where('locations.id', $location->id)->exists()) {
+            return $this->error('Location not found', 404);
+        }
+
+        $days = $request->days ?? 7;
+
+        $historicalData = $location->airQualityData()
+            ->where('timestamp', '>=', now()->subDays($days))
+            ->orderBy('timestamp', 'desc')
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->timestamp->format('Y-m-d');
+            })
+            ->map(function ($dayData) {
+                // Get average AQI for each day
+                return [
+                    'date' => $dayData->first()->timestamp->format('Y-m-d'),
+                    'aqi' => round($dayData->avg('aqi')),
+                    'category' => $this->getAQICategoryFromAverage($dayData->avg('aqi')),
+                    'readings_count' => $dayData->count()
+                ];
+            })
+            ->values();
+
+        return $this->success($historicalData);
+    }
+
+    // Helper method to get API category from average AQI
+    protected function getAQICategoryFromAverage($averageAqi)
+    {
+        if ($averageAqi <= 50) {
+            return 'Good';
+        } elseif ($averageAqi <= 100) {
+            return 'Moderate';
+        } elseif ($averageAqi <= 150) {
+            return 'Unhealthy for Sensitive Groups';
+        } elseif ($averageAqi <= 200) {
+            return 'Unhealthy';
+        } elseif ($averageAqi <= 300) {
+            return 'Very Unhealthy';
+        } else {
+            return 'Hazardous';
+        }
     }
 }
