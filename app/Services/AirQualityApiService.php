@@ -4,9 +4,6 @@ namespace App\Services;
 
 use App\Models\ApiRequestLog;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
-use Exception;
 
 class AirQualityApiService
 {
@@ -21,48 +18,34 @@ class AirQualityApiService
 
     public function getAirQualityByCoordinates($latitude, $longitude)
     {
-        $cacheKey = "air_quality_{$latitude}_{$longitude}";
+        $startTime = microtime(true);
 
-        // Cache for 1 hour since air quality data doesn't change very often
-        return Cache::remember($cacheKey, now()->addHour(), function () use ($latitude, $longitude) {
-            $startTime = microtime(true);
+        $response = Http::get($this->baseUrl, [
+            'lat' => $latitude,
+            'lon' => $longitude,
+            'key' => $this->apiKey,
+        ]);
 
-            try {
-                $response = Http::timeout(15)->get(
-                    $this->baseUrl,
-                    [
-                        'lat' => $latitude,
-                        'lon' => $longitude,
-                        'key' => $this->apiKey,
-                    ]
-                );
+        $executionTime = round((microtime(true) - $startTime) * 1000);
 
-                $executionTime = round((microtime(true) - $startTime) * 1000);
+        // Log the API request
+        ApiRequestLog::create([
+            'api_name' => 'AirQuality API',
+            'endpoint' => $this->baseUrl,
+            'parameters' => json_encode([
+                'lat' => $latitude,
+                'lon' => $longitude,
+            ]),
+            'response_code' => $response->status(),
+            'execution_time' => $executionTime,
+        ]);
 
-                // Log the API request
-                ApiRequestLog::create([
-                    'api_name' => 'AirQuality API',
-                    'endpoint' => $this->baseUrl,
-                    'parameters' => json_encode([
-                        'lat' => $latitude,
-                        'lon' => $longitude,
-                    ]),
-                    'response_code' => $response->status(),
-                    'execution_time' => $executionTime,
-                ]);
-
-                if (!$response->successful()) {
-                    Log::error("Air Quality API error: " . $response->body());
-                    return null;
-                }
-
-                $data = $response->json();
-                return $this->formatAirQualityData($data);
-            } catch (Exception $e) {
-                Log::error("Air Quality API exception: " . $e->getMessage());
-                return null;
-            }
-        });
+        if ($response->successful()) {
+            $data = $response->json();
+            return $this->formatAirQualityData($data);
+        } else {
+            throw new \Exception('Failed to fetch air quality data: ' . $response->body());
+        }
     }
 
     protected function formatAirQualityData($data)
