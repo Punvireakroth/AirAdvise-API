@@ -39,4 +39,9 @@ return [
         'url' => env('AIR_QUALITY_API_URL'),
         'key' => env('AIR_QUALITY_API_KEY'),
     ],
+
+    'geocoding' => [
+        'url' => env('GEOCODING_API_URL', 'https://api.opencagedata.com/geocode/v1/json'),
+        'key' => env('GEOCODING_API_KEY'),
+    ],
 ];
