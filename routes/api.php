@@ -67,6 +67,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/location/search', [LocationSearchController::class, 'search']);
     Route::get('/location/reverse-geocode', [LocationSearchController::class, 'reverseGeocode']);
 
+    // Location historical air quality data
+    Route::get('/locations/{location}/air-quality/historical', [AirQualityController::class, 'getHistorical']);
+
     // Air quality data for user's locations
     Route::get('/locations/{location}/air-quality', [AirQualityController::class, 'getByLocation']);
     Route::get('/locations/{location}/forecast', [ForecastController::class, 'getByLocation']);
