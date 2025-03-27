@@ -16,12 +16,12 @@ use App\Http\Controllers\API\Admin\HealthTipController as AdminHealthTipControll
 use App\Http\Controllers\API\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\API\VerificationController;
 use App\Http\Controllers\API\PasswordResetController;
-
+use App\Http\Controllers\API\LocationSearchController;
 
 
 // Public routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/auth/login', [AuthController::class, 'login']);
 
 // Email verification
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
@@ -62,6 +62,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Locations
     Route::apiResource('locations', LocationController::class);
     Route::post('/locations/{location}/favorite', [LocationController::class, 'toggleFavorite']);
+
+    // Location search
+    Route::get('/location/search', [LocationSearchController::class, 'search']);
+    Route::get('/location/reverse-geocode', [LocationSearchController::class, 'reverseGeocode']);
 
     // Air quality data for user's locations
     Route::get('/locations/{location}/air-quality', [AirQualityController::class, 'getByLocation']);
