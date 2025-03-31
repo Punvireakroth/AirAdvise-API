@@ -15,9 +15,10 @@ class ApiRequestLog extends Model
         'parameters',
         'response_code',
         'execution_time',
+        'created_at',
     ];
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $casts = [
         'parameters' => 'array',

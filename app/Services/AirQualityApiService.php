@@ -28,27 +28,33 @@ class AirQualityApiService
             $startTime = microtime(true);
 
             try {
-                $response = Http::timeout(15)->get(
-                    $this->baseUrl,
-                    [
-                        'lat' => $latitude,
-                        'lon' => $longitude,
-                        'key' => $this->apiKey,
-                    ]
-                );
+                $endpoint = "{$this->baseUrl}/nearest_city";
+
+                $response = Http::timeout(15)->get($endpoint, [
+                    'lat' => $latitude,
+                    'lon' => $longitude,
+                    'key' => $this->apiKey,
+                ]);
 
                 $executionTime = round((microtime(true) - $startTime) * 1000);
 
                 // Log the API request
                 ApiRequestLog::create([
-                    'api_name' => 'AirQuality API',
-                    'endpoint' => $this->baseUrl,
+                    'api_name' => 'IQAir API',
+                    'endpoint' => $endpoint,
                     'parameters' => json_encode([
                         'lat' => $latitude,
                         'lon' => $longitude,
                     ]),
                     'response_code' => $response->status(),
                     'execution_time' => $executionTime,
+                    'created_at' => now(),
+                ]);
+
+                Log::info("Air Quality API request:", [
+                    'url' => $endpoint,
+                    'params' => ['lat' => $latitude, 'lon' => $longitude],
+                    'status' => $response->status(),
                 ]);
 
                 if (!$response->successful()) {
@@ -57,6 +63,12 @@ class AirQualityApiService
                 }
 
                 $data = $response->json();
+
+                // DEBUG
+                Log::info("Air Quality API successful response:", [
+                    'data' => $data
+                ]);
+
                 return $this->formatAirQualityData($data);
             } catch (Exception $e) {
                 Log::error("Air Quality API exception: " . $e->getMessage());
@@ -67,18 +79,38 @@ class AirQualityApiService
 
     protected function formatAirQualityData($data)
     {
-        $aqi = $data['data']['aqi'] ?? 0;
+        if (!isset($data['status']) || $data['status'] !== 'success' || !isset($data['data'])) {
+            Log::error("Invalid air quality API response format:", ['data' => $data]);
+            return null;
+        }
+
+        $pollution = $data['data']['current']['pollution'] ?? null;
+        $weather = $data['data']['current']['weather'] ?? null;
+
+        if (!$pollution) {
+            Log::error("Missing pollution data in API response:", ['data' => $data]);
+            return null;
+        }
+
+        $aqi = $pollution['aqius'] ?? 0;
+
+
+        $category = $this->getAQICategory($aqi);
 
         return [
             'aqi' => $aqi,
-            'pm25' => $data['data']['iaqi']['pm25']['v'] ?? 0,
-            'pm10' => $data['data']['iaqi']['pm10']['v'] ?? 0,
-            'o3' => $data['data']['iaqi']['o3']['v'] ?? null,
-            'no2' => $data['data']['iaqi']['no2']['v'] ?? null,
-            'so2' => $data['data']['iaqi']['so2']['v'] ?? null,
-            'co' => $data['data']['iaqi']['co']['v'] ?? null,
-            'category' => $this->getAQICategory($aqi),
-            'source' => $data['data']['attributions'][0]['name'] ?? 'Unknown',
+            'pm25' => $pollution['aqius'] ?? 0, // IQAir primarily uses PM2.5 for US AQI
+            'pm10' => $pollution['aqicn'] ?? 0, // Using China AQI as proxy for PM10
+            'o3' => null, // IQAir free API doesn't provide individual pollutants
+            'no2' => null,
+            'so2' => null,
+            'co' => null,
+            'category' => $category,
+            'source' => 'IQAir',
+            'temperature' => $weather['tp'] ?? null,
+            'humidity' => $weather['hu'] ?? null,
+            'location_name' => $data['data']['city'] ?? 'Unknown',
+            'country' => $data['data']['country'] ?? 'Unknown',
         ];
     }
 
