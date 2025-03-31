@@ -11,6 +11,7 @@ use App\Models\HealthTip;
 use App\Services\AirQualityApiService;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponses;
+use Illuminate\Support\Facades\Log;
 
 class AirQualityController extends Controller
 {
@@ -70,10 +71,10 @@ class AirQualityController extends Controller
             'aqi' => $airQualityData['aqi'],
             'pm25' => $airQualityData['pm25'],
             'pm10' => $airQualityData['pm10'],
-            'o3' => $airQualityData['o3'],
-            'no2' => $airQualityData['no2'],
-            'so2' => $airQualityData['so2'],
-            'co' => $airQualityData['co'],
+            'o3' => $airQualityData['o3'] ?? null,
+            'no2' => $airQualityData['no2'] ?? null,
+            'so2' => $airQualityData['so2'] ?? null,
+            'co' => $airQualityData['co'] ?? null,
             'category' => $airQualityData['category'],
             'source' => $airQualityData['source'],
             'timestamp' => now(),
@@ -98,6 +99,11 @@ class AirQualityController extends Controller
 
     public function getCurrentByCoordinates(Request $request)
     {
+        // Incomning request is a json object
+        $requestData = $request->all();
+
+        Log::info($requestData);
+
         $request->validate([
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
@@ -109,7 +115,11 @@ class AirQualityController extends Controller
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
             ],
-            ['name' => 'Unnamed Location']
+            [
+                'city_name' => 'Unknown Location',
+                'country' => 'Unknown',
+                'is_active' => true
+            ]
         );
 
         // Check if we have recent data (within last hour)
@@ -119,26 +129,36 @@ class AirQualityController extends Controller
             ->first();
 
         if (!$recentData) {
-            // Fetch from external API
-            $apiData = $this->airQualityService->getAirQualityByCoordinates(
-                $request->latitude,
-                $request->longitude
-            );
+            try {
+                // Fetch from external API
+                $apiData = $this->airQualityService->getAirQualityByCoordinates(
+                    $request->latitude,
+                    $request->longitude
+                );
 
-            // Store the data
-            $recentData = AirQualityData::create([
-                'location_id' => $location->id,
-                'aqi' => $apiData['aqi'],
-                'pm25' => $apiData['pm25'],
-                'pm10' => $apiData['pm10'],
-                'o3' => $apiData['o3'] ?? null,
-                'no2' => $apiData['no2'] ?? null,
-                'so2' => $apiData['so2'] ?? null,
-                'co' => $apiData['co'] ?? null,
-                'category' => $apiData['category'],
-                'source' => $apiData['source'],
-                'timestamp' => now(),
-            ]);
+                // Check if we got data back
+                if (!$apiData) {
+                    return $this->error('Unable to retrieve air quality data from external API', 503);
+                }
+
+                // Store the data
+                $recentData = AirQualityData::create([
+                    'location_id' => $location->id,
+                    'aqi' => $apiData['aqi'] ?? 0,
+                    'pm25' => $apiData['pm25'] ?? 0,
+                    'pm10' => $apiData['pm10'] ?? 0,
+                    'o3' => $apiData['o3'] ?? null,
+                    'no2' => $apiData['no2'] ?? null,
+                    'so2' => $apiData['so2'] ?? null,
+                    'co' => $apiData['co'] ?? null,
+                    'category' => $apiData['category'] ?? 'Good',
+                    'source' => $apiData['source'] ?? 'IQAir',
+                    'timestamp' => now(),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Error creating air quality data: ' . $e->getMessage());
+                return $this->error('Unable to retrieve air quality data: ' . $e->getMessage(), 503);
+            }
         }
 
         // Get activity recommendations

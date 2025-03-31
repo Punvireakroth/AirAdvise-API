@@ -36,7 +36,7 @@ return [
     ],
 
     'air_quality_api' => [
-        'url' => env('AIR_QUALITY_API_URL'),
+        'url' => env('AIR_QUALITY_API_URL', 'https://api.airvisual.com/v2'),
         'key' => env('AIR_QUALITY_API_KEY'),
     ],
 

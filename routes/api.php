@@ -31,7 +31,7 @@ Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'
 
 
 // Air quality data - some endpoints public
-Route::get('/air-quality', [AirQualityController::class, 'getCurrentByCoordinates']);
+Route::get('/air-quality/current', [AirQualityController::class, 'getCurrentByCoordinates']);
 Route::get('/activities', [ActivityController::class, 'index']);
 Route::get('/health-tips/public', [HealthTipController::class, 'public']);
 

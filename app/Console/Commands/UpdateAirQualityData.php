@@ -72,15 +72,15 @@ class UpdateAirQualityData extends Command
             if ($airQualityData) {
                 AirQualityData::create([
                     'location_id' => $location->id,
-                    'aqi' => $airQualityData['aqi'],
-                    'pm25' => $airQualityData['pm25'],
-                    'pm10' => $airQualityData['pm10'],
-                    'o3' => $airQualityData['o3'],
-                    'no2' => $airQualityData['no2'],
-                    'so2' => $airQualityData['so2'],
-                    'co' => $airQualityData['co'],
-                    'category' => $airQualityData['category'],
-                    'source' => $airQualityData['source'],
+                    'aqi' => $airQualityData['aqi'] ?? 0,
+                    'pm25' => $airQualityData['pm25'] ?? 0,
+                    'pm10' => $airQualityData['pm10'] ?? 0,
+                    'o3' => $airQualityData['o3'] ?? null,
+                    'no2' => $airQualityData['no2'] ?? null,
+                    'so2' => $airQualityData['so2'] ?? null,
+                    'co' => $airQualityData['co'] ?? null,
+                    'category' => $airQualityData['category'] ?? 'Unknown',
+                    'source' => $airQualityData['source'] ?? 'IQAir',
                     'timestamp' => now(),
                 ]);
             }
