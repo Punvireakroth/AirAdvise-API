@@ -6,37 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('air_quality_forecasts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('location_id')->constrained()->onDelete('cascade');
+            $table->foreignId('location_id')->constrained('locations')->onDelete('cascade');
             $table->date('forecast_date');
             $table->integer('aqi');
-            $table->decimal('pm25', 6, 2)->nullable();
-            $table->decimal('pm10', 6, 2)->nullable();
-            $table->enum('category', [
-                'Good',
-                'Moderate',
-                'Unhealthy for Sensitive Groups',
-                'Unhealthy',
-                'Very Unhealthy',
-                'Hazardous'
-            ]);
+            $table->float('pm25')->nullable();
+            $table->float('pm10')->nullable();
+            $table->float('o3')->nullable();
+            $table->float('no2')->nullable();
+            $table->float('so2')->nullable();
+            $table->float('co')->nullable();
+            $table->string('category');
+            $table->text('description');
+            $table->text('recommendation')->nullable();
             $table->timestamps();
 
-            // Unique constraint on location_id and forecast_date
-            $table->unique(['location_id', 'forecast_date']);
+            $table->index(['location_id', 'forecast_date']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('air_quality_forecasts');
     }

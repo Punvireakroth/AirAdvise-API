@@ -16,3 +16,5 @@ Schedule::command('app:update-air-quality-data')
 Schedule::command('app:cleanup-old-data')->daily()
     ->at('01:00')
     ->withoutOverlapping();
+
+Schedule::command('forecasts:update')->dailyAt('01:00');

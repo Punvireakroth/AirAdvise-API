@@ -90,4 +90,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('feedback', AdminFeedbackController::class);
         Route::post('/feedback/{feedback}/respond', [AdminFeedbackController::class, 'respond']);
     });
+
+    // Forecast routes
+    Route::get('/locations/{location}/forecasts', [ForecastController::class, 'getByLocation']);
+    Route::get('/forecasts/by-location', [ForecastController::class, 'getByCoordinates']);
+    Route::get('/locations/{location}/forecast-trends', [ForecastController::class, 'getTrends']);
 });
