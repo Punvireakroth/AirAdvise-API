@@ -40,6 +40,11 @@ return [
         'key' => env('AIR_QUALITY_API_KEY'),
     ],
 
+    'forecast_air_quality_api' => [
+        'url' => env('FORECAST_AIR_QUALITY_API_URL', 'http://api.openweathermap.org/data/2.5'),
+        'key' => env('FORECAST_AIR_QUALITY_API_KEY'),
+    ],
+
     'geocoding' => [
         'url' => env('GEOCODING_API_URL', 'https://api.opencagedata.com/geocode/v1/json'),
         'key' => env('GEOCODING_API_KEY'),
