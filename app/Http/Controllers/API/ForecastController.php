@@ -9,14 +9,15 @@ use App\Services\ForecastAirQualityApiService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class ForecastController extends Controller
 {
-    protected $airQualityService;
+    protected $forecastService;
 
-    public function __construct(ForecastAirQualityApiService $airQualityService)
+    public function __construct(ForecastAirQualityApiService $forecastService)
     {
-        $this->airQualityService = $airQualityService;
+        $this->forecastService = $forecastService;
     }
 
     /**
@@ -24,6 +25,8 @@ class ForecastController extends Controller
      */
     public function getByLocation(Location $location, Request $request)
     {
+        Log::info('getByLocation', ['location' => $location, 'request' => $request->all()]);
+
         $startDate = $request->input('start_date')
             ? Carbon::parse($request->input('start_date'))
             : Carbon::today();
@@ -40,41 +43,13 @@ class ForecastController extends Controller
         // Try to get from database first
         $forecasts = $this->getForecasts($location, $startDate, $endDate);
 
-        // Calculate best day if activities filter provided
-        $bestDay = null;
-        if ($request->has('activity_type')) {
-            $bestDay = $this->calculateBestDay($forecasts, $request->input('activity_type'));
-        }
+        // Always calculate best day, regardless of whether activity_type is provided
+        $bestDay = $this->calculateBestDay($forecasts);
 
         return response()->json([
             'forecasts' => $forecasts,
             'best_day' => $bestDay,
         ]);
-    }
-
-    /**
-     * Get forecasts by coordinates
-     */
-    public function getByCoordinates(Request $request)
-    {
-        $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
-
-        $latitude = $request->input('latitude');
-        $longitude = $request->input('longitude');
-
-        // Find or create location
-        $location = Location::firstOrCreate(
-            ['latitude' => $latitude, 'longitude' => $longitude],
-            [
-                'name' => "Location at {$latitude}, {$longitude}",
-                'country' => 'Unknown', // Should be resolved via reverse geocoding
-            ]
-        );
-
-        return $this->getByLocation($location, $request);
     }
 
     /**
@@ -93,7 +68,7 @@ class ForecastController extends Controller
         }
 
         // Otherwise, fetch from external API and store
-        $externalForecasts = $this->airQualityService->getForecast($location->latitude, $location->longitude);
+        $externalForecasts = $this->forecastService->getForecast($location->latitude, $location->longitude);
 
         if ($externalForecasts) {
             $savedForecasts = [];
@@ -118,41 +93,104 @@ class ForecastController extends Controller
             return collect($savedForecasts);
         }
 
-        // If external API fails, return whatever we have
         return $existingForecasts;
     }
 
     /**
-     * Calculate best day for a given activity type
+     * Calculate best day and recommended activities
      */
-    protected function calculateBestDay($forecasts, $activityType)
+    protected function calculateBestDay($forecasts)
     {
         if ($forecasts->isEmpty()) {
             return null;
         }
 
-        // Define AQI thresholds for different activity types
-        $thresholds = [
-            'low' => 100,      // Low intensity (walking, yoga)
-            'moderate' => 75,  // Moderate intensity (hiking, cycling)
-            'high' => 50       // High intensity (running, sports)
+        // Get the day with the lowest AQI
+        $bestDay = $forecasts->sortBy('aqi')->first();
+
+        // Clone the best day to avoid modifying the original object
+        $bestDayWithActivities = clone $bestDay;
+
+        // Get recommended activities based on AQI level
+        $recommendedActivities = $this->getRecommendedActivities($bestDay->aqi);
+
+        // Add the recommendations to the best day data
+        $bestDayWithActivities->recommended_activities = $recommendedActivities;
+
+        Log::info('Best day calculated', [
+            'best_day' => $bestDayWithActivities,
+            'aqi' => $bestDay->aqi
+        ]);
+
+        return $bestDayWithActivities;
+    }
+
+    /**
+     * Get recommended activities based on AQI level
+     */
+    protected function getRecommendedActivities($aqi)
+    {
+        $activities = [
+            'high' => [
+                'Running',
+                'Cycling',
+                'Tennis',
+                'Soccer',
+                'Basketball',
+                'HIIT workouts'
+            ],
+            'moderate' => [
+                'Brisk walking',
+                'Light cycling',
+                'Swimming',
+                'Yoga',
+                'Golf',
+                'Gardening'
+            ],
+            'low' => [
+                'Walking',
+                'Stretching',
+                'Tai Chi',
+                'Light gardening',
+                'Casual strolling'
+            ]
         ];
 
-        $activityType = strtolower($activityType);
-        $threshold = $thresholds[$activityType] ?? 75; // Default to moderate
+        // Determine which intensity levels are safe based on AQI
+        $recommendations = [];
 
-        // Filter days below threshold
-        $suitableDays = $forecasts->filter(function ($forecast) use ($threshold) {
-            return $forecast->aqi <= $threshold;
-        });
-
-        // If no days are suitable, return the one with lowest AQI
-        if ($suitableDays->isEmpty()) {
-            return $forecasts->sortBy('aqi')->first();
+        if ($aqi <= 50) {
+            // Good air quality - all activities are fine
+            $recommendations = [
+                'high' => $activities['high'],
+                'moderate' => $activities['moderate'],
+                'low' => $activities['low']
+            ];
+        } elseif ($aqi <= 100) {
+            // Moderate air quality - moderate and low intensity activities are recommended
+            $recommendations = [
+                'moderate' => $activities['moderate'],
+                'low' => $activities['low']
+            ];
+        } elseif ($aqi <= 150) {
+            // Unhealthy for sensitive groups - only low intensity activities
+            $recommendations = [
+                'low' => $activities['low']
+            ];
+        } else {
+            // Unhealthy or worse - consider indoor activities
+            $recommendations = [
+                'indoor' => [
+                    'Indoor yoga',
+                    'Indoor gym workouts',
+                    'Home exercises',
+                    'Mall walking',
+                    'Indoor swimming'
+                ]
+            ];
         }
 
-        // Otherwise return the best suitable day
-        return $suitableDays->sortBy('aqi')->first();
+        return $recommendations;
     }
 
     /**

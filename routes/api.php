@@ -70,9 +70,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Location historical air quality data
     Route::get('/locations/{location}/air-quality/historical', [AirQualityController::class, 'getHistorical']);
 
-    // Air quality data for user's locations
-    Route::get('/locations/{location}/air-quality', [AirQualityController::class, 'getByLocation']);
-    Route::get('/locations/{location}/forecast', [ForecastController::class, 'getByLocation']);
 
     // Health tips
     Route::get('/health-tips', [HealthTipController::class, 'index']);
@@ -93,6 +90,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Forecast routes
     Route::get('/locations/{location}/forecasts', [ForecastController::class, 'getByLocation']);
-    Route::get('/forecasts/by-location', [ForecastController::class, 'getByCoordinates']);
     Route::get('/locations/{location}/forecast-trends', [ForecastController::class, 'getTrends']);
 });
