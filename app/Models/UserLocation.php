@@ -13,10 +13,12 @@ class UserLocation extends Model
         'user_id',
         'location_id',
         'is_favorite',
+        'is_default',
     ];
 
     protected $casts = [
         'is_favorite' => 'boolean',
+        'is_default' => 'boolean',
     ];
 
     // Relationships

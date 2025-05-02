@@ -17,6 +17,7 @@ use App\Http\Controllers\API\Admin\FeedbackController as AdminFeedbackController
 use App\Http\Controllers\API\VerificationController;
 use App\Http\Controllers\API\PasswordResetController;
 use App\Http\Controllers\API\LocationSearchController;
+use App\Http\Controllers\API\UserLocationController;
 
 
 // Public routes
@@ -91,4 +92,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Forecast routes
     Route::get('/locations/{location}/forecasts', [ForecastController::class, 'getByLocation']);
     Route::get('/locations/{location}/forecast-trends', [ForecastController::class, 'getTrends']);
+
+    // User locations
+    Route::get('/user/locations', [UserLocationController::class, 'index']);
+    Route::post('/user/locations', [UserLocationController::class, 'store']);
+    Route::delete('/user/locations/{id}', [UserLocationController::class, 'destroy']);
+    Route::post('/user/locations/{id}/default', [UserLocationController::class, 'setDefault']);
+    Route::post('/user/locations/{id}/favorite', [UserLocationController::class, 'toggleFavorite']);
 });

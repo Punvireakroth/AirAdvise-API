@@ -38,19 +38,13 @@ class Location extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_locations')
-            ->withPivot('is_favorite')
+            ->withPivot('is_favorite', 'is_default')
             ->withTimestamps();
     }
 
     public function airQualityData()
     {
         return $this->hasMany(AirQualityData::class);
-    }
-
-    public function latestAirQuality()
-    {
-        return $this->hasOne(AirQualityData::class)
-            ->latest('timestamp');
     }
 
     public function forecasts()

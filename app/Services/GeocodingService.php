@@ -113,4 +113,25 @@ class GeocodingService
             ]);
         });
     }
+
+    protected function processReverseGeocodeResult($data)
+    {
+        if (empty($data['results'])) {
+            return null;
+        }
+
+        $result = $data['results'][0];
+        $components = $result['components'] ?? [];
+
+        return [
+            'city' => $components['city'] ?? $components['town'] ?? $components['village'] ?? $components['hamlet'] ?? "Unknown Location",
+            'state' => $components['state'] ?? $components['county'] ?? null,
+            'country' => $components['country'] ?? 'Unknown',
+            'country_code' => $components['country_code'] ?? null,
+            'latitude' => $result['geometry']['lat'] ?? null,
+            'longitude' => $result['geometry']['lng'] ?? null,
+            'formatted' => $result['formatted'] ?? null,
+            'timezone' => $result['annotations']['timezone']['name'] ?? null,
+        ];
+    }
 }

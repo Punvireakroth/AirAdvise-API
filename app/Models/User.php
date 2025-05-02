@@ -62,8 +62,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function locations()
     {
         return $this->belongsToMany(Location::class, 'user_locations')
-            ->withPivot('is_favorite')
+            ->withPivot('is_favorite', 'is_default')
             ->withTimestamps();
+    }
+
+    public function defaultLocation()
+    {
+        return $this->belongsToMany(Location::class, 'user_locations')
+            ->withPivot('is_default')
+            ->wherePivot('is_default', true)
+            ->first();
     }
 
     public function notifications()
