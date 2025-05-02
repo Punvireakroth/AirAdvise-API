@@ -20,63 +20,127 @@ class LocationSearchController extends Controller
         $this->geocodingService = $geocodingService;
     }
 
+    /**
+     * Search for a location by query
+     */
+
     public function search(Request $request)
     {
         $request->validate([
-            'query' => 'required|string|max:100',
+            'query' => 'required|string|min:2|max:100',
         ]);
 
-        // First, search in the db
-        $dbLocations = Location::where('city_name', 'like', '%' . $request->query . '%')
-            ->orWhere('country', 'like', '%' . $request->query . '%')
-            ->limit(5)
-            ->get();
+        $query = $request->query;
+        $results = $this->geocodingService->searchLocations($query);
+        $user = $request->user();
 
-        // If result found, return them
-        if ($dbLocations->count() >= 5) {
-            return $this->success(LocationResource::collection($dbLocations));
+        if (empty($results)) {
+            return $this->error('No locations found', 404);
         }
 
-        // If no results found, use geocoding API
-        $apiLocations = $this->geocodingService->searchLocations($request->query);
+        $locations = [];
 
-
-        // Save new locations to db avoid new future requests to the API
-        foreach ($apiLocations as $location) {
-            if (!$location->exists) {
-                $location->save();
+        foreach ($results as $result) {
+            // Skip entries if query is without these
+            if (empty($result['city']) || empty($result['latitude']) || empty($result['longitude'])) {
+                continue;
             }
+
+            // Check if location already exists in db
+            $location = Location::firstOrCreate(
+                [
+                    'latitude' => $result['latitude'],
+                    'longitude' => $result['longitude']
+                ],
+                [
+                    'city_name' => $result['city'],
+                    'state_province' => $result['state'],
+                    'country' => $result['country'],
+                    'country_code' => $result['country_code'],
+                    'timezone' => $result['timezone'],
+                    'is_active' => true
+                ]
+            );
+
+            // Check if it's a favorite location for current user
+            $isFavorite = false;
+            if ($user) {
+                $isFavorite = $user->locations()
+                    ->wherePivot('location_id', $location->id)
+                    ->wherePivot('is_favorite', true)
+                    ->exists();
+            }
+
+            $locations[] = [
+                'id' => $location->id,
+                'name' => $location->city_name,
+                'state' => $location->state_province,
+                'country' => $location->country,
+                'latitude' => $location->latitude,
+                'longitude' => $location->longitude,
+                'is_favorite' => $isFavorite
+            ];
         }
 
-
-        // Merge db and api result and return
-        $mergedLocations = $dbLocations->merge($apiLocations)->unique('id');
-
-        return $this->success(LocationResource::collection($mergedLocations));
+        return $this->success($locations);
     }
 
 
+    /**
+     * Reverse geocoding to get location details by coordinates
+     */
     public function reserveGeocoding(Request $request)
     {
+        $user = $request->user();
+
         $request->validate([
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
         ]);
 
-        $location = $this->geocodingService->reverseGeocode(
-            $request->latitude,
-            $request->longitude
-        );
+        $latitude = $request->input('latitude');
+        $longitude = $request->input('longitude');
 
-        if (!$location) {
+        $locationDetails = $this->geocodingService->reverseGeocode($latitude, $longitude);
+
+        if (empty($locationDetails)) {
             return $this->error('Location not found', 404);
         }
 
-        // Save location to database if it's new
-        if (!$location->exists) {
-            $location->save();
+        $location = Location::firstOrCreate(
+            [
+                'latitude' => $locationDetails['latitude'],
+                'longitude' => $locationDetails['longitude']
+            ],
+            [
+                'city_name' => $locationDetails['city'],
+                'state_province' => $locationDetails['state'],
+                'country' => $locationDetails['country'],
+                'country_code' => $locationDetails['country_code'],
+                'timezone' => $locationDetails['timezone'],
+                'is_active' => true
+            ]
+        );
+
+        // Check if it's a favorite location for current user
+        $isFavorite = false;
+        if ($user) {
+            $isFavorite = $user->locations()
+                ->wherePivot('location_id', $location->id)
+                ->wherePivot('is_favorite', true)
+                ->exists();
         }
 
-        return $this->success(new LocationResource($location));
+        $locationData = [
+            'id' => $location->id,
+            'name' => $location->city_name,
+            'state' => $location->state_province,
+            'country' => $location->country,
+            'latitude' => $location->latitude,
+            'longitude' => $location->longitude,
+            'is_favorite' => $isFavorite
+        ];
+
+        return $this->success($locationData);
     }
 }
