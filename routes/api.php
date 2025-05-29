@@ -9,7 +9,7 @@ use App\Http\Controllers\API\Admin\HealthTipController as AdminHealthTipControll
 use App\Http\Controllers\API\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\API\VerificationController;
 use App\Http\Controllers\API\PasswordResetController;
-use App\Http\Controllers\CityController;
+use App\Http\Controllers\API\CityController;
 
 
 // Public routes

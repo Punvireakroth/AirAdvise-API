@@ -12,6 +12,8 @@ use App\Services\AirQualityApiService;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponses;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use App\Models\City;
 
 class AirQualityController extends Controller
 {
@@ -22,79 +24,6 @@ class AirQualityController extends Controller
     public function __construct(AirQualityApiService $airQualityService)
     {
         $this->airQualityService = $airQualityService;
-    }
-
-    public function getByLocation(Request $request, Location $location)
-    {
-        // Check if location belongs to user
-        if (!$request->user()->locations()->where('locations.id', $location->id)->exists()) {
-            return $this->error('Location not found', 404);
-        }
-
-        // Check if we have recent data (within last hour)
-        $recentData = $location->airQualityData()
-            ->where('timestamp', '>=', now()->subHour())
-            ->latest('timestamp')
-            ->first();
-
-        if ($recentData) {
-            // Get activity recommendations
-            $safeActivities = Activity::where('max_safe_aqi', '>=', $recentData->aqi)->get();
-            $unsafeActivities = Activity::where('max_safe_aqi', '<', $recentData->aqi)->get();
-
-            // Get health tips
-            $healthTips = HealthTip::where('min_aqi', '<=', $recentData->aqi)
-                ->where('max_aqi', '>=', $recentData->aqi)
-                ->get();
-
-            return $this->success([
-                'air_quality' => new AirQualityDataResource($recentData),
-                'safe_activities' => $safeActivities,
-                'unsafe_activities' => $unsafeActivities,
-                'health_tips' => $healthTips,
-            ]);
-        }
-
-        // If no recent data, fetch from API
-        $airQualityData = $this->airQualityService->getAirQualityByCoordinates(
-            $location->latitude,
-            $location->longitude
-        );
-
-        if (!$airQualityData) {
-            return $this->error('Unable to retrieve air quality data', 404);
-        }
-
-        // Store the data
-        $recentData = AirQualityData::create([
-            'location_id' => $location->id,
-            'aqi' => $airQualityData['aqi'],
-            'pm25' => $airQualityData['pm25'],
-            'pm10' => $airQualityData['pm10'],
-            'o3' => $airQualityData['o3'] ?? null,
-            'no2' => $airQualityData['no2'] ?? null,
-            'so2' => $airQualityData['so2'] ?? null,
-            'co' => $airQualityData['co'] ?? null,
-            'category' => $airQualityData['category'],
-            'source' => $airQualityData['source'],
-            'timestamp' => now(),
-        ]);
-
-        // Get activity recommendations
-        $safeActivities = Activity::where('max_safe_aqi', '>=', $recentData->aqi)->get();
-        $unsafeActivities = Activity::where('max_safe_aqi', '<', $recentData->aqi)->get();
-
-        // Get health tips based on the last 1 hour air quality data
-        $healthTips = HealthTip::where('min_aqi', '<=', $recentData->aqi)
-            ->where('max_aqi', '>=', $recentData->aqi)
-            ->get();
-
-        return $this->success([
-            'air_quality' => new AirQualityDataResource($recentData),
-            'safe_activities' => $safeActivities,
-            'unsafe_activities' => $unsafeActivities,
-            'health_tips' => $healthTips,
-        ]);
     }
 
     public function getCurrentByCoordinates(Request $request)
@@ -178,41 +107,6 @@ class AirQualityController extends Controller
         ]);
     }
 
-    // Get historical air quality data for a location
-    public function getHistorical(Request $request, Location $location)
-    {
-        $request->validate([
-            'days' => 'required|integer|min:1|max:30',
-        ]);
-
-        // Check if user has access to that location
-        if (!$request->user()->locations()->where('locations.id', $location->id)->exists()) {
-            return $this->error('Location not found', 404);
-        }
-
-        $days = $request->days ?? 7;
-
-        $historicalData = $location->airQualityData()
-            ->where('timestamp', '>=', now()->subDays($days))
-            ->orderBy('timestamp', 'desc')
-            ->get()
-            ->groupBy(function ($item) {
-                return $item->timestamp->format('Y-m-d');
-            })
-            ->map(function ($dayData) {
-                // Get average AQI for each day
-                return [
-                    'date' => $dayData->first()->timestamp->format('Y-m-d'),
-                    'aqi' => round($dayData->avg('aqi')),
-                    'category' => $this->getAQICategoryFromAverage($dayData->avg('aqi')),
-                    'readings_count' => $dayData->count()
-                ];
-            })
-            ->values();
-
-        return $this->success($historicalData);
-    }
-
     // Helper method to get API category from average AQI
     protected function getAQICategoryFromAverage($averageAqi)
     {
@@ -229,5 +123,136 @@ class AirQualityController extends Controller
         } else {
             return 'Hazardous';
         }
+    }
+
+    /**
+     * Get air quality data for a specific location and zoom level
+     */
+
+    public function getMapData(Request $request)
+    {
+        $request->validate([
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
+            'zoom' => 'required|numeric|min:1|max:20',
+            'pollutant' => 'required|string|in:AQI,NO2,PM25,PM10,O3,SO2,CO',
+        ]);
+
+        $latitude = $request->lat;
+        $longitude = $request->lng;
+        $zoom = $request->zoom;
+        $pollutant = $request->pollutant;
+
+        $cacheKey = "map_air_quality_{$latitude}_{$longitude}_{$zoom}_{$pollutant}";
+
+        // Cache the result for 30 minutes
+        return Cache::remember($cacheKey, 30 * 60, function () use ($latitude, $longitude, $zoom, $pollutant) {
+            $pollutantData = $this->airQualityService->getMapTileData(
+                $latitude,
+                $longitude,
+                $zoom,
+                $pollutant
+            );
+
+            if (!$pollutantData) {
+                return response()->json([
+                    'error' => 'Could not retrieve air quality data',
+                    'timestamp' => now()->toIso8601String(),
+                ], 503);
+            }
+
+            $colorScheme = $this->getPollutantColorScheme($pollutant);
+            $tileServerBaseUrl = config('services.air_quality.tile_server_url', 'https://tiles.airadvise.com/v1');
+            $mapUrl = "{$tileServerBaseUrl}/{$pollutant}/{$colorScheme}";
+
+            return response()->json([
+                'mapUrl' => $mapUrl,
+                'attribution' => 'Air quality data © OpenWeatherMap',
+                'timestamp' => $pollutantData['timestamp'] ?? now()->toIso8601String(),
+                'data' => $pollutantData,
+            ]);
+        });
+    }
+
+    private function getPollutantColorScheme($pollutant)
+    {
+        $schemes = [
+            'AQI' => 'aqi_classic',
+            'PM25' => 'pm25_gradient',
+            'PM10' => 'pm10_gradient',
+            'O3' => 'o3_scale',
+            'NO2' => 'no2_scale',
+            'SO2' => 'so2_scale',
+            'CO' => 'co_scale',
+        ];
+
+        return $schemes[$pollutant] ?? 'aqi_classic';
+    }
+
+    /**
+     * Get air quality data for a specific city.
+     */
+    public function getCityAirQuality($cityId)
+    {
+        $city = City::findOrFail($cityId);
+
+        // Create a cache key based on city ID
+        $cacheKey = "city_air_quality_{$cityId}";
+
+        // Cache the result for 15 minutes
+        return Cache::remember($cacheKey, 15 * 60, function () use ($city) {
+            $airQualityData = $this->airQualityService->getCityAirQualityData($city);
+
+            // Fallback data if API is down
+            if (!$airQualityData) {
+                $aqi = rand(20, 200);
+                $pm25 = round(rand(5, 80) / 2, 1);
+                $pm10 = round(rand(10, 120) / 2, 1);
+                $o3 = round(rand(10, 100) / 2, 1);
+                $no2 = round(rand(5, 80) / 2, 1);
+                $so2 = round(rand(1, 40) / 2, 1);
+                $co = round(rand(1, 30) / 10, 1);
+                $category = $this->getAQICategoryFromAverage($aqi);
+
+                Log::warning("Could not get real air quality data for city ID {$city->id}. Using fallback data.");
+
+                return response()->json([
+                    'id' => rand(10000, 99999),
+                    'location_id' => $city->id,
+                    'aqi' => $aqi,
+                    'pm25' => $pm25,
+                    'pm10' => $pm10,
+                    'o3' => $o3,
+                    'no2' => $no2,
+                    'so2' => $so2,
+                    'co' => $co,
+                    'category' => $category,
+                    'source' => 'AirAdvise API (generated)',
+                    'timestamp' => now()->toIso8601String(),
+                    'isLive' => false,
+                    'pollutants' => "Generated by API - External API unavailable",
+                ]);
+            }
+
+            // Calculate AQI category based on the real data
+            $category = $this->getAQICategoryFromAverage($airQualityData['aqi']);
+
+            return response()->json([
+                'id' => rand(10000, 99999),
+                'location_id' => $city->id,
+                'aqi' => $airQualityData['aqi'],
+                'pm25' => $airQualityData['pm25'],
+                'pm10' => $airQualityData['pm10'],
+                'o3' => $airQualityData['o3'],
+                'no2' => $airQualityData['no2'],
+                'so2' => $airQualityData['so2'],
+                'co' => $airQualityData['co'],
+                'category' => $category,
+                'source' => 'OpenWeatherMap',
+                'timestamp' => $airQualityData['timestamp'],
+                'isLive' => true,
+                'pollutants' => "Real data from OpenWeatherMap",
+            ]);
+        });
     }
 }
