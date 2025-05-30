@@ -68,7 +68,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function favoriteCities()
     {
-        return $this->hasMany(UserFavoriteCity::class);
+        return $this->belongsToMany(City::class, 'user_favorite_cities')
+            ->withPivot('is_default')
+            ->withTimestamps();
     }
 
     public function notifications()
