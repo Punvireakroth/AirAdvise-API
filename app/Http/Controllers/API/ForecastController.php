@@ -46,6 +46,15 @@ class ForecastController extends Controller
         // Always calculate best day, regardless of whether activity_type is provided
         $bestDay = $this->calculateBestDay($forecasts);
 
+        $responsesData = [
+            'forecasts' => $forecasts,
+            'best_day' => $bestDay,
+        ];
+
+        Log::info("Show me this: " . json_encode($responsesData));
+
+
+
         return response()->json([
             'forecasts' => $forecasts,
             'best_day' => $bestDay,

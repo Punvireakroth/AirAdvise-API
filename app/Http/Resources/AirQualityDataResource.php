@@ -16,7 +16,7 @@ class AirQualityDataResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'location' => new LocationResource($this->whenLoaded('location')),
+            'location_id' => $this->location_id,
             'aqi' => $this->aqi,
             'category' => $this->category,
             'color_code' => $this->getColorCode(),
