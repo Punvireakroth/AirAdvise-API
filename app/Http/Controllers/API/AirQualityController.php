@@ -28,11 +28,6 @@ class AirQualityController extends Controller
 
     public function getCurrentByCoordinates(Request $request)
     {
-        // Incomning request is a json object
-        $requestData = $request->all();
-
-        Log::info($requestData);
-
         $request->validate([
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
