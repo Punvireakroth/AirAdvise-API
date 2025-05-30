@@ -47,6 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('health-tips', AdminHealthTipController::class);
         Route::apiResource('feedback', AdminFeedbackController::class);
         Route::post('/feedback/{feedback}/respond', [AdminFeedbackController::class, 'respond']);
+
+        // User location analytics
+        Route::get('/analytics/user-locations', [UserLocationController::class, 'getAnalytics']);
     });
 
     // Air quality data - Forecast endpoints -----------

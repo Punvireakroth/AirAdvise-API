@@ -66,6 +66,11 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();
     }
 
+    public function favoriteCities()
+    {
+        return $this->hasMany(UserFavoriteCity::class);
+    }
+
     public function notifications()
     {
         return $this->hasMany(UserNotification::class);
