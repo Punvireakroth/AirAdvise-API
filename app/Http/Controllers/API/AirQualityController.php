@@ -128,13 +128,13 @@ class AirQualityController extends Controller
     {
         $request->validate([
             'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
+            'long' => 'required|numeric',
             'zoom' => 'required|numeric|min:1|max:20',
             'pollutant' => 'required|string|in:AQI,NO2,PM25,PM10,O3,SO2,CO',
         ]);
 
         $latitude = $request->lat;
-        $longitude = $request->lng;
+        $longitude = $request->long;
         $zoom = $request->zoom;
         $pollutant = $request->pollutant;
 
