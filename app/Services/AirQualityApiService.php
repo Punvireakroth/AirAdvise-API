@@ -137,11 +137,17 @@ class AirQualityApiService
         $apiUrl = config('services.forecast_air_quality_api.url') . '/air_pollution';
         $apiKey = config('services.forecast_air_quality_api.key');
 
-        $response = Http::get($apiUrl, [
-            'lat' => $latitude,
-            'lon' => $longitude,
-            'appid' => $apiKey,
-        ]);
+        try {
+            $response = Http::get($apiUrl, [
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'appid' => $apiKey,
+            ]);
+        } catch (Exception $e) {
+            Log::error("Air Quality API exception: " . $e->getMessage());
+            return null;
+        }
+
 
         if ($response->successful()) {
             $data = $response->json();

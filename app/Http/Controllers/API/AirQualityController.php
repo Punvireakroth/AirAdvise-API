@@ -149,12 +149,12 @@ class AirQualityController extends Controller
                 $pollutant
             );
 
-            if (!$pollutantData) {
-                return response()->json([
-                    'error' => 'Could not retrieve air quality data',
-                    'timestamp' => now()->toIso8601String(),
-                ], 503);
-            }
+            // if (!$pollutantData) {
+            //     return response()->json([
+            //         'error' => 'Could not retrieve air quality data',
+            //         'timestamp' => now()->toIso8601String(),
+            //     ], 503);
+            // }
 
             $colorScheme = $this->getPollutantColorScheme($pollutant);
             $tileServerBaseUrl = config('services.air_quality.tile_server_url', 'https://tiles.airadvise.com/v1');
