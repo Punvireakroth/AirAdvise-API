@@ -15,6 +15,16 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Models\City;
 
+/**
+ * @OA\Info(
+ *     title="AirAdvice API",
+ *     version="1.0.0",
+ *     description="API for the AirAdvice air quality monitoring application",
+ *     @OA\Contact(
+ *         email="support@airadvice.com"
+ *     )
+ * )
+ */
 class AirQualityController extends Controller
 {
     use ApiResponses;
@@ -26,6 +36,65 @@ class AirQualityController extends Controller
         $this->airQualityService = $airQualityService;
     }
 
+    /**
+     * Get air quality data for a specific location.
+     *
+     * @OA\Get(
+     *     path="/api/air-quality",
+     *     operationId="getAirQuality",
+     *     tags={"Air Quality"},
+     *     summary="Get air quality data for a location",
+     *     description="Returns air quality data based on coordinates",
+     *     @OA\Parameter(
+     *         name="lat",
+     *         in="query",
+     *         description="Latitude of the location",
+     *         required=true,
+     *         @OA\Schema(type="number", format="float")
+     *     ),
+     *     @OA\Parameter(
+     *         name="long",
+     *         in="query",
+     *         description="Longitude of the location",
+     *         required=true,
+     *         @OA\Schema(type="number", format="float")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="aqi", type="integer", example=42),
+     *             @OA\Property(property="pm25", type="integer", example=42),
+     *             @OA\Property(property="pm10", type="integer", example=25),
+     *             @OA\Property(property="o3", type="integer", example=15),
+     *             @OA\Property(property="no2", type="integer", example=10),
+     *             @OA\Property(property="so2", type="integer", example=5),
+     *             @OA\Property(property="co", type="integer", example=2),
+     *             @OA\Property(property="category", type="string", example="Good"),
+     *             @OA\Property(property="source", type="string", example="IQAir"),
+     *             @OA\Property(property="temperature", type="integer", example=25),
+     *             @OA\Property(property="humidity", type="integer", example=65),
+     *             @OA\Property(property="location_name", type="string", example="New York"),
+     *             @OA\Property(property="country", type="string", example="United States")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid parameters",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The lat field is required.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=503,
+     *         description="Service unavailable",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Could not retrieve air quality data"),
+     *             @OA\Property(property="timestamp", type="string", example="2023-06-01T12:00:00+00:00")
+     *         )
+     *     )
+     * )
+     */
     public function getCurrentByCoordinates(Request $request)
     {
         $request->validate([
@@ -121,9 +190,83 @@ class AirQualityController extends Controller
     }
 
     /**
-     * Get air quality data for a specific location and zoom level
+     * Get map data for air quality visualization.
+     *
+     * @OA\Get(
+     *     path="/api/map-data",
+     *     operationId="getMapData",
+     *     tags={"Air Quality"},
+     *     summary="Get map data for air quality visualization",
+     *     description="Returns map visualization data for air quality",
+     *     @OA\Parameter(
+     *         name="lat",
+     *         in="query",
+     *         description="Latitude of the center point",
+     *         required=true,
+     *         @OA\Schema(type="number", format="float")
+     *     ),
+     *     @OA\Parameter(
+     *         name="long",
+     *         in="query",
+     *         description="Longitude of the center point",
+     *         required=true,
+     *         @OA\Schema(type="number", format="float")
+     *     ),
+     *     @OA\Parameter(
+     *         name="zoom",
+     *         in="query",
+     *         description="Map zoom level (1-20)",
+     *         required=true,
+     *         @OA\Schema(type="integer", minimum=1, maximum=20)
+     *     ),
+     *     @OA\Parameter(
+     *         name="pollutant",
+     *         in="query",
+     *         description="Pollutant type to display",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string",
+     *             enum={"AQI", "NO2", "PM25", "PM10", "O3", "SO2", "CO"}
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="mapUrl", type="string", example="https://tiles.airadvise.com/v1/AQI/default"),
+     *             @OA\Property(property="attribution", type="string", example="Air quality data © OpenWeatherMap"),
+     *             @OA\Property(property="timestamp", type="string", example="2023-06-01T12:00:00+00:00"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="timestamp", type="string", example="2023-06-01T12:00:00+00:00"),
+     *                 @OA\Property(property="aqi", type="integer", example=75),
+     *                 @OA\Property(property="pm25", type="number", format="float", example=18.5),
+     *                 @OA\Property(property="pm10", type="number", format="float", example=24.3),
+     *                 @OA\Property(property="o3", type="number", format="float", example=42.1),
+     *                 @OA\Property(property="no2", type="number", format="float", example=15.7),
+     *                 @OA\Property(property="so2", type="number", format="float", example=8.2),
+     *                 @OA\Property(property="co", type="number", format="float", example=0.8)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid parameters",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The pollutant field must be one of AQI, NO2, PM25, PM10, O3, SO2, CO.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=503,
+     *         description="Service unavailable",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Could not retrieve air quality data"),
+     *             @OA\Property(property="timestamp", type="string", example="2023-06-01T12:00:00+00:00")
+     *         )
+     *     )
+     * )
      */
-
     public function getMapData(Request $request)
     {
         $request->validate([
