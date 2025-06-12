@@ -1,0 +1,374 @@
+<mxfile host="app.diagrams.net" modified="2023-06-01T00:00:00.000Z" agent="5.0 (Macintosh)" etag="your-etag" version="15.0.0" type="device">
+  <diagram id="airadvice-architecture" name="AirAdvice Architecture">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Background and Title -->
+        <mxCell id="background" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry width="1200" height="800" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="title" value="AirAdvice API Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1;fontColor=#1a202c;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Client Applications -->
+        <mxCell id="client_container" value="Client Applications" style="swimlane;rounded=1;fillColor=#4ade80;strokeColor=#22c55e;fontColor=#ffffff;fontSize=16;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="250" height="300" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mobile_app" value="Mobile App" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;fontColor=#22c55e;" vertex="1" parent="client_container">
+          <mxGeometry x="20" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="web_client" value="Web Client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;fontColor=#22c55e;" vertex="1" parent="client_container">
+          <mxGeometry x="130" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api_consumption" value="API Consumption" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;fontColor=#22c55e;" vertex="1" parent="client_container">
+          <mxGeometry x="20" y="110" width="210" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="json_parsing" value="JSON Parsing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;fontColor=#22c55e;" vertex="1" parent="client_container">
+          <mxGeometry x="20" y="170" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="auth_token" value="Authentication" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;fontColor=#22c55e;" vertex="1" parent="client_container">
+          <mxGeometry x="130" y="170" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="client_app_logic" value="Application Logic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;fontColor=#22c55e;" vertex="1" parent="client_container">
+          <mxGeometry x="20" y="230" width="210" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- HTTP Communication -->
+        <mxCell id="http_req" value="HTTP Requests" style="endArrow=classic;html=1;strokeColor=#f59e0b;strokeWidth=2;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;fontColor=#f59e0b;" edge="1" parent="1" source="client_container" target="laravel_container">
+          <mxGeometry x="0.0118" y="15" width="50" height="50" relative="1" as="geometry">
+            <mxPoint as="sourcePoint" />
+            <mxPoint as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="http_res" value="JSON Responses" style="endArrow=classic;html=1;strokeColor=#f59e0b;strokeWidth=2;exitX=0;exitY=0.4;exitDx=0;exitDy=0;entryX=1;entryY=0.4;entryDx=0;entryDy=0;fontColor=#f59e0b;" edge="1" parent="1" source="laravel_container" target="client_container">
+          <mxGeometry x="-0.0118" y="-15" width="50" height="50" relative="1" as="geometry">
+            <mxPoint as="sourcePoint" />
+            <mxPoint as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Laravel Server Container -->
+        <mxCell id="laravel_container" value="Laravel API Server" style="swimlane;rounded=1;fillColor=#e0e7ff;strokeColor=#6366f1;fontColor=#6366f1;fontSize=18;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="400" y="80" width="700" height="650" as="geometry" />
+        </mxCell>
+        
+        <!-- API Routes -->
+        <mxCell id="api_routes" value="routes/api.php" style="swimlane;rounded=1;fillColor=#fef3c7;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="laravel_container">
+          <mxGeometry x="20" y="50" width="150" height="130" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="route_air" value="GET /api/air-quality" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=10;" vertex="1" parent="api_routes">
+          <mxGeometry x="10" y="40" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="route_auth" value="POST /api/auth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=10;" vertex="1" parent="api_routes">
+          <mxGeometry x="10" y="70" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="route_user" value="GET /api/user" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=10;" vertex="1" parent="api_routes">
+          <mxGeometry x="10" y="100" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- Web Routes -->
+        <mxCell id="web_routes" value="routes/web.php" style="swimlane;rounded=1;fillColor=#fce7f3;strokeColor=#ec4899;fontColor=#ec4899;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="laravel_container">
+          <mxGeometry x="20" y="200" width="150" height="130" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="route_admin" value="GET /admin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ec4899;fontColor=#ec4899;fontSize=10;" vertex="1" parent="web_routes">
+          <mxGeometry x="10" y="40" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="route_users" value="GET /admin/users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ec4899;fontColor=#ec4899;fontSize=10;" vertex="1" parent="web_routes">
+          <mxGeometry x="10" y="70" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="route_delete" value="DELETE /admin/users/{id}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ec4899;fontColor=#ec4899;fontSize=10;" vertex="1" parent="web_routes">
+          <mxGeometry x="10" y="100" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- API Controllers -->
+        <mxCell id="api_controllers" value="API Controllers" style="swimlane;rounded=1;fillColor=#dcfce7;strokeColor=#22c55e;fontColor=#22c55e;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="laravel_container">
+          <mxGeometry x="200" y="50" width="150" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user_controller" value="UserController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;fontColor=#22c55e;fontSize=10;" vertex="1" parent="api_controllers">
+          <mxGeometry x="10" y="40" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="auth_controller" value="AuthController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;fontColor=#22c55e;fontSize=10;" vertex="1" parent="api_controllers">
+          <mxGeometry x="10" y="70" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="air_controller" value="AirQualityController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#22c55e;fontColor=#22c55e;fontSize=10;" vertex="1" parent="api_controllers">
+          <mxGeometry x="10" y="100" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="response_json" value="return response()->json()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=10;" vertex="1" parent="api_controllers">
+          <mxGeometry x="10" y="130" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- Admin Controllers -->
+        <mxCell id="admin_controllers" value="Admin Controllers" style="swimlane;rounded=1;fillColor=#dbeafe;strokeColor=#3b82f6;fontColor=#3b82f6;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="laravel_container">
+          <mxGeometry x="200" y="250" width="150" height="130" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin_controller" value="AdminController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#3b82f6;fontColor=#3b82f6;fontSize=10;" vertex="1" parent="admin_controllers">
+          <mxGeometry x="10" y="40" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin_user_controller" value="UserController (Admin)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#3b82f6;fontColor=#3b82f6;fontSize=10;" vertex="1" parent="admin_controllers">
+          <mxGeometry x="10" y="70" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin_feedback" value="FeedbackController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#3b82f6;fontColor=#3b82f6;fontSize=10;" vertex="1" parent="admin_controllers">
+          <mxGeometry x="10" y="100" width="130" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- Services -->
+        <mxCell id="services" value="Services" style="swimlane;rounded=1;fillColor=#f3e8ff;strokeColor=#8b5cf6;fontColor=#8b5cf6;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="laravel_container">
+          <mxGeometry x="380" y="50" width="300" height="100" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="air_service" value="AirQualityApiService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#8b5cf6;fontColor=#8b5cf6;fontSize=10;" vertex="1" parent="services">
+          <mxGeometry x="10" y="40" width="130" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="external_apis" value="External API Integration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#8b5cf6;fontColor=#8b5cf6;fontSize=10;" vertex="1" parent="services">
+          <mxGeometry x="160" y="40" width="130" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Blade Views -->
+        <mxCell id="views" value="Blade Views (Admin)" style="swimlane;rounded=1;fillColor=#fef2f2;strokeColor=#ef4444;fontColor=#ef4444;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="laravel_container">
+          <mxGeometry x="380" y="170" width="300" height="130" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin_dashboard" value="admin/dashboard.blade.php" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ef4444;fontColor=#ef4444;fontSize=10;" vertex="1" parent="views">
+          <mxGeometry x="10" y="40" width="130" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin_users_index" value="admin/users/index.blade.php" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ef4444;fontColor=#ef4444;fontSize=10;" vertex="1" parent="views">
+          <mxGeometry x="160" y="40" width="130" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin_users_show" value="admin/users/show.blade.php" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ef4444;fontColor=#ef4444;fontSize=10;" vertex="1" parent="views">
+          <mxGeometry x="10" y="80" width="130" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin_layout" value="layouts/admin.blade.php" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ef4444;fontColor=#ef4444;fontSize=10;" vertex="1" parent="views">
+          <mxGeometry x="160" y="80" width="130" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Middleware -->
+        <mxCell id="middleware" value="Middleware" style="swimlane;rounded=1;fillColor=#fef3c7;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="laravel_container">
+          <mxGeometry x="380" y="320" width="300" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="auth_middleware" value="Auth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=10;" vertex="1" parent="middleware">
+          <mxGeometry x="10" y="40" width="80" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="admin_middleware" value="AdminMiddleware" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=10;" vertex="1" parent="middleware">
+          <mxGeometry x="110" y="40" width="80" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api_middleware" value="API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=10;" vertex="1" parent="middleware">
+          <mxGeometry x="210" y="40" width="80" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- Models -->
+        <mxCell id="models" value="Models" style="swimlane;rounded=1;fillColor=#e0f2fe;strokeColor=#0ea5e9;fontColor=#0ea5e9;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="laravel_container">
+          <mxGeometry x="20" y="400" width="330" height="100" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="user_model" value="User" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0ea5e9;fontColor=#0ea5e9;fontSize=10;" vertex="1" parent="models">
+          <mxGeometry x="10" y="40" width="50" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="city_model" value="City" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0ea5e9;fontColor=#0ea5e9;fontSize=10;" vertex="1" parent="models">
+          <mxGeometry x="70" y="40" width="50" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="location_model" value="Location" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0ea5e9;fontColor=#0ea5e9;fontSize=10;" vertex="1" parent="models">
+          <mxGeometry x="130" y="40" width="50" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="preference_model" value="UserPreference" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0ea5e9;fontColor=#0ea5e9;fontSize=10;" vertex="1" parent="models">
+          <mxGeometry x="190" y="40" width="80" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feedback_model" value="Feedback" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0ea5e9;fontColor=#0ea5e9;fontSize=10;" vertex="1" parent="models">
+          <mxGeometry x="280" y="40" width="40" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Database -->
+        <mxCell id="database" value="Database" style="swimlane;rounded=1;fillColor=#f1f5f9;strokeColor=#64748b;fontColor=#64748b;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="laravel_container">
+          <mxGeometry x="20" y="520" width="330" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- DB visual representation -->
+        <mxCell id="db_cylinder_top" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#64748b;strokeColor=#64748b;" vertex="1" parent="database">
+          <mxGeometry x="140" y="40" width="50" height="10" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="db_cylinder_body" value="MySQL" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#64748b;strokeColor=#64748b;fontColor=#ffffff;" vertex="1" parent="database">
+          <mxGeometry x="140" y="40" width="50" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="migrations" value="Migrations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#64748b;fontSize=10;" vertex="1" parent="database">
+          <mxGeometry x="10" y="45" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="seeders" value="Seeders" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#64748b;fontColor=#64748b;fontSize=10;" vertex="1" parent="database">
+          <mxGeometry x="220" y="45" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- External APIs -->
+        <mxCell id="external_api_box" value="External APIs" style="swimlane;rounded=1;fillColor=#fafafa;strokeColor=#d4d4d4;fontColor=#333333;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="50" y="500" width="250" height="150" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="iqair_api" value="IQAir API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d4d4d4;fontColor=#333333;fontSize=10;" vertex="1" parent="external_api_box">
+          <mxGeometry x="20" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="weather_api" value="OpenWeatherMap API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d4d4d4;fontColor=#333333;fontSize=10;" vertex="1" parent="external_api_box">
+          <mxGeometry x="130" y="50" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api_key_config" value="API Key Configuration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d4d4d4;fontColor=#333333;fontSize=10;" vertex="1" parent="external_api_box">
+          <mxGeometry x="20" y="100" width="210" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- External API Connection -->
+        <mxCell id="api_connection" value="HTTP Requests" style="endArrow=classic;html=1;strokeColor=#d4d4d4;strokeWidth=2;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;curved=1;fontColor=#333333;" edge="1" parent="1" source="external_api_box" target="services">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint as="sourcePoint" />
+            <mxPoint as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="175" y="450" />
+              <mxPoint x="350" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Connection arrows -->
+        <mxCell id="api_routes_to_controllers" value="" style="endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="api_routes" target="api_controllers">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint as="sourcePoint" />
+            <mxPoint as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="web_routes_to_admin" value="" style="endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="web_routes" target="admin_controllers">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint as="sourcePoint" />
+            <mxPoint as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="controllers_to_services" value="" style="endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=1.5;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="api_controllers" target="services">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint as="sourcePoint" />
+            <mxPoint as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="admin_to_views" value="" style="endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="admin_controllers" target="views">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint as="sourcePoint" />
+            <mxPoint as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="controllers_to_models" value="" style="endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="admin_controllers" target="models">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint as="sourcePoint" />
+            <mxPoint as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="models_to_db" value="" style="endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="models" target="database">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint as="sourcePoint" />
+            <mxPoint as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Feature description boxes -->
+        <mxCell id="features" value="Key Features" style="swimlane;rounded=1;fillColor=#fdf4ff;strokeColor=#d946ef;fontColor=#a21caf;fontSize=14;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="850" y="350" width="200" height="200" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feature_1" value="Air Quality Data Retrieval" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d946ef;fontColor=#a21caf;fontSize=10;" vertex="1" parent="features">
+          <mxGeometry x="20" y="40" width="160" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feature_2" value="Admin User Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d946ef;fontColor=#a21caf;fontSize=10;" vertex="1" parent="features">
+          <mxGeometry x="20" y="70" width="160" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feature_3" value="External API Integration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d946ef;fontColor=#a21caf;fontSize=10;" vertex="1" parent="features">
+          <mxGeometry x="20" y="100" width="160" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feature_4" value="City &amp; Location Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d946ef;fontColor=#a21caf;fontSize=10;" vertex="1" parent="features">
+          <mxGeometry x="20" y="130" width="160" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="feature_5" value="User Preferences" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d946ef;fontColor=#a21caf;fontSize=10;" vertex="1" parent="features">
+          <mxGeometry x="20" y="160" width="160" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend" style="swimlane;rounded=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontSize=12;fontStyle=1;startSize=23;" vertex="1" parent="1">
+          <mxGeometry x="850" y="570" width="200" height="130" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api_legend" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#f59e0b;fontColor=#f59e0b;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="30" width="20" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="api_legend_text" value="API Components" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="40" y="30" width="150" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="web_legend" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce7f3;strokeColor=#ec4899;fontColor=#ec4899;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="55" width="20" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="web_legend_text" value="Web Components" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="40" y="55" width="150" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="model_legend" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0ea5e9;fontColor=#0ea5e9;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="80" width="20" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="model_legend_text" value="Data Models" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="40" y="80" width="150" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="external_legend" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#d4d4d4;fontColor=#333333;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="105" width="20" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="external_legend_text" value="External Services" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="40" y="105" width="150" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

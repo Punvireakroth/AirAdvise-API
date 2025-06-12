@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\City;
+
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -17,6 +16,7 @@ class DatabaseSeeder extends Seeder
         // Seed cities
         $this->call([
             CitySeeder::class,
+            AdminUserSeeder::class,
         ]);
     }
 }

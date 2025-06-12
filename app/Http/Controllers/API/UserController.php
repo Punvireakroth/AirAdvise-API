@@ -15,11 +15,6 @@ class UserController extends Controller
 {
     use ApiResponses, AuthorizesRequests;
 
-    public function show(Request $request)
-    {
-        return $this->success(new UserResource($request->user()));
-    }
-
     public function update(UpdateUserRequest $request)
     {
         $user = $request->user();
@@ -40,12 +35,28 @@ class UserController extends Controller
     // Admin: List all users
     public function index()
     {
-        $this->authorize('viewAny', User::class);
+        $users = User::latest()->paginate(10);
+        return view('admin.users.index', compact('users'));
+    }
 
-        $users = User::paginate(10);
+    public function show(User $user)
+    {
+        return view('admin.users.show', compact('user'));
+    }
 
-        return $this->success(
-            UserResource::collection($users)->response()->getData(true)
-        );
+    public function destroy(User $user)
+    {
+        // Prevent admin from deleting themselves
+        if ($user->id === request()->user()->id) {
+            return back()->with('error', 'You cannot delete your own account.');
+        }
+
+        // Prevent deleting other admin users
+        if ($user->isAdmin() && $user->id !== request()->user()->id) {
+            return back()->with('error', 'You cannot delete other admin accounts.');
+        }
+
+        $user->delete();
+        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     }
 }
