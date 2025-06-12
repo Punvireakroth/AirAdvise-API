@@ -72,6 +72,10 @@
                         class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                         <i class="fas fa-users me-2"></i> Users
                     </a>
+                    <a href="{{ route('admin.activities.index') }}"
+                        class="{{ request()->routeIs('admin.activities.*') ? 'active' : '' }}">
+                        <i class="fas fa-running me-2"></i> Activities
+                    </a>
                     <!-- Add more sidebar links as needed -->
                 </div>
             </div>

@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('activities', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->enum('intensity_level', ['high', 'moderate', 'low']);
             $table->text('description')->nullable();
-            $table->integer('max_safe_aqi');
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }
