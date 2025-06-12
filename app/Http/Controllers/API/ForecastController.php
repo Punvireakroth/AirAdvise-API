@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\AirQualityForecast;
 use App\Models\Location;
+use App\Models\Activity;
 use App\Services\ForecastAirQualityApiService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -137,69 +138,50 @@ class ForecastController extends Controller
     /**
      * Get recommended activities based on AQI level
      */
-    protected function getRecommendedActivities($aqi)
+    protected function getRecommendedActivities($aqiLevel)
     {
-        $activities = [
-            'high' => [
-                'Running',
-                'Cycling',
-                'Tennis',
-                'Soccer',
-                'Basketball',
-                'HIIT workouts'
-            ],
-            'moderate' => [
-                'Brisk walking',
-                'Light cycling',
-                'Swimming',
-                'Yoga',
-                'Golf',
-                'Gardening'
-            ],
-            'low' => [
-                'Walking',
-                'Stretching',
-                'Tai Chi',
-                'Light gardening',
-                'Casual strolling'
-            ]
-        ];
+        $activities = Activity::getGroupedActivities();
 
-        // Determine which intensity levels are safe based on AQI
-        $recommendations = [];
+        $levels = ['high', 'moderate', 'low'];
+        foreach ($levels as $level) {
+            if (!isset($activities[$level])) {
+                $activities[$level] = [];
+            }
+        }
 
-        if ($aqi <= 50) {
-            // Good air quality - all activities are fine
-            $recommendations = [
+        // Return appropriate activities based on AQI level
+        if ($aqiLevel <= 50) {
+            // Good air quality 
+            return $activities;
+        } elseif ($aqiLevel <= 100) {
+            // Moderate air quality - avoid high intensity for sensitive groups
+            return [
                 'high' => $activities['high'],
                 'moderate' => $activities['moderate'],
                 'low' => $activities['low']
             ];
-        } elseif ($aqi <= 100) {
-            // Moderate air quality - moderate and low intensity activities are recommended
-            $recommendations = [
+        } elseif ($aqiLevel <= 150) {
+            // Unhealthy for sensitive groups - reduce high intensity, favor moderate
+            return [
+                'high' => [],
                 'moderate' => $activities['moderate'],
                 'low' => $activities['low']
             ];
-        } elseif ($aqi <= 150) {
-            // Unhealthy for sensitive groups - only low intensity activities
-            $recommendations = [
+        } elseif ($aqiLevel <= 200) {
+            // Unhealthy - avoid high intensity, reduce moderate
+            return [
+                'high' => [],
+                'moderate' => [],
                 'low' => $activities['low']
             ];
         } else {
-            // Unhealthy or worse - consider indoor activities
-            $recommendations = [
-                'indoor' => [
-                    'Indoor yoga',
-                    'Indoor gym workouts',
-                    'Home exercises',
-                    'Mall walking',
-                    'Indoor swimming'
-                ]
+            // Very unhealthy or hazardous - avoid outdoor activities
+            return [
+                'high' => [],
+                'moderate' => [],
+                'low' => []
             ];
         }
-
-        return $recommendations;
     }
 
     /**

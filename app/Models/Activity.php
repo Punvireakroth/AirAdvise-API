@@ -11,23 +11,26 @@ class Activity extends Model
 
     protected $fillable = [
         'name',
+        'intensity_level',
         'description',
-        'max_safe_aqi',
+        'active'
     ];
 
-    protected $casts = [
-        'max_safe_aqi' => 'integer',
-    ];
-
-    // Scope for finding safe activities for a given AQI
-    public function scopeSafeFor($query, $aqi)
+    /**
+     * Get activities grouped by intensity level
+     * 
+     * @return array
+     */
+    public static function getGroupedActivities()
     {
-        return $query->where('max_safe_aqi', '>=', $aqi);
-    }
+        $activities = self::where('active', true)
+            ->orderBy('name')
+            ->get()
+            ->groupBy('intensity_level')
+            ->map(function ($items) {
+                return $items->pluck('name')->toArray();
+            });
 
-    // Scope for finding unsafe activities for a given AQI
-    public function scopeUnsafeFor($query, $aqi)
-    {
-        return $query->where('max_safe_aqi', '<', $aqi);
+        return $activities->toArray();
     }
 }

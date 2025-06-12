@@ -1,0 +1,329 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "AirAdvice API",
+        "description": "API for the AirAdvice air quality monitoring application",
+        "contact": {
+            "email": "support@airadvice.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/air-quality": {
+            "get": {
+                "tags": [
+                    "Air Quality"
+                ],
+                "summary": "Get air quality data for a location",
+                "description": "Returns air quality data based on coordinates",
+                "operationId": "getAirQuality",
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "description": "Latitude of the location",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "long",
+                        "in": "query",
+                        "description": "Longitude of the location",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "aqi": {
+                                            "type": "integer",
+                                            "example": 42
+                                        },
+                                        "pm25": {
+                                            "type": "integer",
+                                            "example": 42
+                                        },
+                                        "pm10": {
+                                            "type": "integer",
+                                            "example": 25
+                                        },
+                                        "o3": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "no2": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "so2": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "co": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "category": {
+                                            "type": "string",
+                                            "example": "Good"
+                                        },
+                                        "source": {
+                                            "type": "string",
+                                            "example": "IQAir"
+                                        },
+                                        "temperature": {
+                                            "type": "integer",
+                                            "example": 25
+                                        },
+                                        "humidity": {
+                                            "type": "integer",
+                                            "example": 65
+                                        },
+                                        "location_name": {
+                                            "type": "string",
+                                            "example": "New York"
+                                        },
+                                        "country": {
+                                            "type": "string",
+                                            "example": "United States"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The lat field is required."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service unavailable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Could not retrieve air quality data"
+                                        },
+                                        "timestamp": {
+                                            "type": "string",
+                                            "example": "2023-06-01T12:00:00+00:00"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/map-data": {
+            "get": {
+                "tags": [
+                    "Air Quality"
+                ],
+                "summary": "Get map data for air quality visualization",
+                "description": "Returns map visualization data for air quality",
+                "operationId": "getMapData",
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "description": "Latitude of the center point",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "long",
+                        "in": "query",
+                        "description": "Longitude of the center point",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "zoom",
+                        "in": "query",
+                        "description": "Map zoom level (1-20)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 20,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "pollutant",
+                        "in": "query",
+                        "description": "Pollutant type to display",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "AQI",
+                                "NO2",
+                                "PM25",
+                                "PM10",
+                                "O3",
+                                "SO2",
+                                "CO"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mapUrl": {
+                                            "type": "string",
+                                            "example": "https://tiles.airadvise.com/v1/AQI/default"
+                                        },
+                                        "attribution": {
+                                            "type": "string",
+                                            "example": "Air quality data © OpenWeatherMap"
+                                        },
+                                        "timestamp": {
+                                            "type": "string",
+                                            "example": "2023-06-01T12:00:00+00:00"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "timestamp": {
+                                                    "type": "string",
+                                                    "example": "2023-06-01T12:00:00+00:00"
+                                                },
+                                                "aqi": {
+                                                    "type": "integer",
+                                                    "example": 75
+                                                },
+                                                "pm25": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 18.5
+                                                },
+                                                "pm10": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 24.3
+                                                },
+                                                "o3": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 42.1
+                                                },
+                                                "no2": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 15.7
+                                                },
+                                                "so2": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 8.2
+                                                },
+                                                "co": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 0.8
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The pollutant field must be one of AQI, NO2, PM25, PM10, O3, SO2, CO."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service unavailable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Could not retrieve air quality data"
+                                        },
+                                        "timestamp": {
+                                            "type": "string",
+                                            "example": "2023-06-01T12:00:00+00:00"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Air Quality",
+            "description": "Air Quality"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format: Bearer {api_token}",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    }
+}
