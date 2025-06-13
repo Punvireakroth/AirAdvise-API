@@ -2,16 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\AirQualityController;
 use App\Http\Controllers\API\ForecastController;
-use App\Http\Controllers\API\Admin\HealthTipController as AdminHealthTipController;
-use App\Http\Controllers\API\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\API\VerificationController;
 use App\Http\Controllers\API\PasswordResetController;
 use App\Http\Controllers\API\CityController;
 use App\Http\Controllers\API\UserLocationController;
-
+use App\Http\Controllers\API\FeedbackController;
 
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']); // WORK***
@@ -40,17 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
     Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 
-    // Air quality data - Admin endpoints -----------
-    // Admin routes
-    Route::middleware('admin')->prefix('admin')->group(function () {
-        Route::get('/users', [UserController::class, 'index']); // Admin: List all users
-        Route::apiResource('health-tips', AdminHealthTipController::class);
-        Route::apiResource('feedback', AdminFeedbackController::class);
-        Route::post('/feedback/{feedback}/respond', [AdminFeedbackController::class, 'respond']);
-
-        // User location analytics
-        Route::get('/analytics/user-locations', [UserLocationController::class, 'getAnalytics']);
-    });
 
     // Air quality data - Forecast endpoints -----------
     // Forecast routes
@@ -70,4 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/favorites', [UserLocationController::class, 'store']);
     Route::delete('/user/favorites/{cityId}', [UserLocationController::class, 'destroy']);
     Route::post('/user/favorites/default', [UserLocationController::class, 'setDefault']);
+
+    // Air quality data - Feedback endpoints -----------
+    Route::post('/feedback', [FeedbackController::class, 'storeUserFeedback']);
+    Route::get('/feedback', [FeedbackController::class, 'getUserFeedback']);
 });

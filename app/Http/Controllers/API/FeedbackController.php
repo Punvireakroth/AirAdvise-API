@@ -96,4 +96,45 @@ class FeedbackController extends Controller
         return redirect()->route('admin.feedback.index')
             ->with('success', 'Feedback deleted successfully.');
     }
+
+
+    /**
+     * API for the feedbacks ------------------------------------------------------------
+     */
+
+    public function storeUserFeedback(Request $request)
+    {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        $feedback = Feedback::create([
+            'user_id' => Auth::id(),
+            'subject' => $validated['subject'],
+            'message' => $validated['message'],
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'message' => 'Feedback submitted successfully',
+            'feedback' => $feedback,
+        ], 201);
+    }
+
+    /**
+     * Get feedbacks responses from admin for authenticated user ------------------------------------------------------------
+     * 
+     */
+    public function getUserFeedback()
+    {
+        $feedback = Feedback::where('user_id', Auth::id())
+            ->with('responses')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'feedback' => $feedback
+        ]);
+    }
 }
