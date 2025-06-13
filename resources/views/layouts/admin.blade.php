@@ -76,7 +76,16 @@
                         class="{{ request()->routeIs('admin.activities.*') ? 'active' : '' }}">
                         <i class="fas fa-running me-2"></i> Activities
                     </a>
-                    <!-- Add more sidebar links as needed -->
+                    <a href="{{ route('admin.feedback.index') }}"
+                        class="{{ request()->routeIs('admin.feedback.*') ? 'active' : '' }}">
+                        <i class="fas fa-comments me-2"></i> Feedback
+                        @php
+                        $pendingCount = \App\Models\Feedback::where('status', 'pending')->count();
+                        @endphp
+                        @if($pendingCount > 0)
+                        <span class="badge bg-danger float-end">{{ $pendingCount }}</span>
+                        @endif
+                    </a>
                 </div>
             </div>
             <div class="col-md-10 p-4">
