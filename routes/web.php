@@ -8,7 +8,7 @@ use App\Http\Controllers\API\ActivityController;
 use App\Http\Controllers\API\FeedbackController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('admin.login');
 });
 
 Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
