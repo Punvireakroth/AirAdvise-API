@@ -59,7 +59,7 @@ class FeedbackController extends Controller
 
         FeedbackResponse::create([
             'feedback_id' => $feedback->id,
-            'admin_id' => Auth::id(),
+            'admin_id' => request()->user()->id,
             'response' => $validated['response'],
         ]);
 
@@ -124,7 +124,6 @@ class FeedbackController extends Controller
 
     /**
      * Get feedbacks responses from admin for authenticated user ------------------------------------------------------------
-     * 
      */
     public function getUserFeedback()
     {

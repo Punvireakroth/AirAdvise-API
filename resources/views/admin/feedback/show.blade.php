@@ -111,10 +111,10 @@
                 @csrf
 
                 <div class="mb-3">
-                    <label for="message" class="form-label">Response Message</label>
-                    <textarea class="form-control @error('message') is-invalid @enderror" id="message" name="message"
-                        rows="5" required>{{ old('message') }}</textarea>
-                    @error('message')
+                    <label for="response" class="form-label">Response Message</label>
+                    <textarea class="form-control @error('response') is-invalid @enderror" id="response" name="response"
+                        rows="5" required>{{ old('response') }}</textarea>
+                    @error('response')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
