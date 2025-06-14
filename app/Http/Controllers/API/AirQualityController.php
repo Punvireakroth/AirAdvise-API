@@ -103,14 +103,14 @@ class AirQualityController extends Controller
         ]);
 
         // Find or create location
-        $location = Location::firstOrCreate(
-            [
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
-            ],
+        $location = Location::updateOrCreate(
             [
                 'city_name' => 'Unknown Location',
                 'country' => 'Unknown',
+            ],
+            [
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
                 'is_active' => true
             ]
         );
